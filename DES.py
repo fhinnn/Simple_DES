@@ -1,4 +1,5 @@
 import sys
+import gradio as gr
 
 #fungsi untuk konversi ascii karakter ke bentuk hexadesimal
 def ascii_to_hex(string):
@@ -217,7 +218,7 @@ def proses(pt, rkb, rk):
 
 	# Initial Permutation
 	pt = permute(pt, initial_perm, 64)
-	print("After initial permutation", bin2hex(pt))
+	# print("After initial permutation", bin2hex(pt))
 
 	# split text menjadi 2 bagian masing masing 32bit
 	left = pt[0:32]
@@ -248,8 +249,8 @@ def proses(pt, rkb, rk):
 		# Swapper
 		if(i != 15):
 			left, right = right, left
-		print("Round ", i + 1, " ", bin2hex(left),
-			" ", bin2hex(right), " ", rk[i])
+		# print("Round ", i + 1, " ", bin2hex(left),
+		# 	" ", bin2hex(right), " ", rk[i])
 
 	# Combination
 	combine = left + right
@@ -259,78 +260,171 @@ def proses(pt, rkb, rk):
 	return cipher_text
 
 
-key = input("Masukkan key(harus 8 karakter): ")
-if len(key) != 8:
-	print("Dibilangin harus 8 karakter !!!")
-	sys.exit()
+# key = input("Masukkan key(harus 8 karakter): ")
+# if len(key) != 8:
+# 	print("Dibilangin harus 8 karakter !!!")
+# 	sys.exit()
 
 
-#terjemahkan ke biner dulu
-key = hex2bin(ascii_to_hex(key))
+# #terjemahkan ke biner dulu
+# key = hex2bin(ascii_to_hex(key))
 
-# --parity bit drop table
-keyp = [57, 49, 41, 33, 25, 17, 9,
-		1, 58, 50, 42, 34, 26, 18,
-		10, 2, 59, 51, 43, 35, 27,
-		19, 11, 3, 60, 52, 44, 36,
-		63, 55, 47, 39, 31, 23, 15,
-		7, 62, 54, 46, 38, 30, 22,
-		14, 6, 61, 53, 45, 37, 29,
-		21, 13, 5, 28, 20, 12, 4]
+# # --parity bit drop table
+# keyp = [57, 49, 41, 33, 25, 17, 9,
+# 		1, 58, 50, 42, 34, 26, 18,
+# 		10, 2, 59, 51, 43, 35, 27,
+# 		19, 11, 3, 60, 52, 44, 36,
+# 		63, 55, 47, 39, 31, 23, 15,
+# 		7, 62, 54, 46, 38, 30, 22,
+# 		14, 6, 61, 53, 45, 37, 29,
+# 		21, 13, 5, 28, 20, 12, 4]
 
-# getting 56 bit key from 64 bit using the parity bits
-key = permute(key, keyp, 56)
+# # getting 56 bit key from 64 bit using the parity bits
+# key = permute(key, keyp, 56)
 
-# Number of bit shifts
-shift_table = [1, 1, 2, 2,
-			2, 3, 2, 2,
-			1, 2, 4, 2,
-			2, 2, 2, 1]
+# # Number of bit shifts
+# shift_table = [1, 1, 2, 2,
+# 			2, 3, 2, 2,
+# 			1, 2, 4, 2,
+# 			2, 2, 2, 1]
 
-# Key- Compression Table : Compression of key from 56 bits to 48 bits
-key_comp = [14, 17, 11, 24, 1, 5,
-			3, 28, 15, 6, 21, 10,
-			23, 19, 12, 4, 26, 8,
-			16, 7, 27, 20, 13, 2,
-			41, 52, 31, 37, 47, 55,
-			30, 40, 51, 45, 33, 48,
-			44, 49, 39, 56, 34, 53,
-			46, 42, 50, 36, 29, 32]
+# # Key- Compression Table : Compression of key from 56 bits to 48 bits
+# key_comp = [14, 17, 11, 24, 1, 5,
+# 			3, 28, 15, 6, 21, 10,
+# 			23, 19, 12, 4, 26, 8,
+# 			16, 7, 27, 20, 13, 2,
+# 			41, 52, 31, 37, 47, 55,
+# 			30, 40, 51, 45, 33, 48,
+# 			44, 49, 39, 56, 34, 53,
+# 			46, 42, 50, 36, 29, 32]
 
-# Splitting
-left = key[0:28] # rkb for RoundKeys in binary
-right = key[28:56] # rk for RoundKeys in hexadecimal
+# # Splitting
+# left = key[0:28] # rkb for RoundKeys in binary
+# right = key[28:56] # rk for RoundKeys in hexadecimal
 
-rkb = []
-rk = []
-for i in range(0, 16):
-	# Shifting the bits by nth shifts by checking from shift table
-	left = shift_left(left, shift_table[i])
-	right = shift_left(right, shift_table[i])
+# rkb = []
+# rk = []
+# for i in range(0, 16):
+# 	# Shifting the bits by nth shifts by checking from shift table
+# 	left = shift_left(left, shift_table[i])
+# 	right = shift_left(right, shift_table[i])
 
-	# Combination of left and right string
-	combine_str = left + right
+# 	# Combination of left and right string
+# 	combine_str = left + right
 
-	# Compression of key from 56 to 48 bits
-	round_key = permute(combine_str, key_comp, 48)
+# 	# Compression of key from 56 to 48 bits
+# 	round_key = permute(combine_str, key_comp, 48)
 
-	rkb.append(round_key)
-	rk.append(bin2hex(round_key))
+# 	rkb.append(round_key)
+# 	rk.append(bin2hex(round_key))
 
-pilihan = int(input("Ngapain nih ???\n1.Encrypt\n2.Decrypt\n->"))
-if pilihan == 1:
-	print("============================================== Encryption ================================================================")
-	pt = input("Masukkan Plaintext: ")
-	cipher_text = bin2hex(proses(ascii_to_hex(pt), rkb, rk))
-	print("Cipher Text : ", cipher_text)
+# pilihan = int(input("Ngapain nih ???\n1.Encrypt\n2.Decrypt\n->"))
+# if pilihan == 1:
+# 	print("============================================== Encryption ================================================================")
+# 	pt = input("Masukkan Plaintext: ")
+# 	cipher_text = bin2hex(proses(ascii_to_hex(pt), rkb, rk))
+# 	print("Cipher Text : ", cipher_text)
 
-elif pilihan == 2:
-	print("============================================== Decryption ================================================================")
-	rkb_rev = rkb[::-1]
-	rk_rev = rk[::-1]
-	cipher_text = input("Masukkan Cipher_text: ")
-	text = hex2ascii(bin2hex(proses(cipher_text, rkb_rev, rk_rev)))
-	print("Plain Text : ", text)
+# elif pilihan == 2:
+# 	print("============================================== Decryption ================================================================")
+# 	rkb_rev = rkb[::-1]
+# 	rk_rev = rk[::-1]
+# 	cipher_text = input("Masukkan Cipher_text: ")
+# 	text = hex2ascii(bin2hex(proses(cipher_text, rkb_rev, rk_rev)))
+# 	print("Plain Text : ", text)
 
-else:
-	print("Perintahnya cuman antara 2 itu bang !!!")
+# else:
+# 	print("Perintahnya cuman antara 2 itu bang !!!")
+
+def process_function(key, text, pilihan):
+    # key = input("Masukkan key (harus 8 karakter): ")
+    # if len(key) != 8:
+    #     print("Dibilangin harus 8 karakter !!!")
+    #     sys.exit()
+
+    # terjemahkan ke biner dulu
+    key = hex2bin(ascii_to_hex(key))
+
+    # --parity bit drop table
+    keyp = [57, 49, 41, 33, 25, 17, 9,
+            1, 58, 50, 42, 34, 26, 18,
+            10, 2, 59, 51, 43, 35, 27,
+            19, 11, 3, 60, 52, 44, 36,
+            63, 55, 47, 39, 31, 23, 15,
+            7, 62, 54, 46, 38, 30, 22,
+            14, 6, 61, 53, 45, 37, 29,
+            21, 13, 5, 28, 20, 12, 4]
+
+    # getting 56 bit key from 64 bit using the parity bits
+    key = permute(key, keyp, 56)
+
+    # Number of bit shifts
+    shift_table = [1, 1, 2, 2,
+                   2, 3, 2, 2,
+                   1, 2, 4, 2,
+                   2, 2, 2, 1]
+
+    # Key- Compression Table : Compression of key from 56 bits to 48 bits
+    key_comp = [14, 17, 11, 24, 1, 5,
+                3, 28, 15, 6, 21, 10,
+                23, 19, 12, 4, 26, 8,
+                16, 7, 27, 20, 13, 2,
+                41, 52, 31, 37, 47, 55,
+                30, 40, 51, 45, 33, 48,
+                44, 49, 39, 56, 34, 53,
+                46, 42, 50, 36, 29, 32]
+
+    # Splitting
+    left = key[0:28]  # rkb for RoundKeys in binary
+    right = key[28:56]  # rk for RoundKeys in hexadecimal
+
+    rkb = []
+    rk = []
+    for i in range(0, 16):
+        # Shifting the bits by nth shifts by checking from shift table
+        left = shift_left(left, shift_table[i])
+        right = shift_left(right, shift_table[i])
+
+        # Combination of left and right string
+        combine_str = left + right
+
+        # Compression of key from 56 to 48 bits
+        round_key = permute(combine_str, key_comp, 48)
+
+        rkb.append(round_key)
+        rk.append(bin2hex(round_key))
+
+    # pilihan = int(input("Ngapain nih ???\n1.Encrypt\n2.Decrypt\n->"))
+    if pilihan == "Encrypt":
+        # print("============================================== Encryption ================================================================")
+        # pt = input("Masukkan Plaintext: ")
+        text = bin2hex(proses(ascii_to_hex(text), rkb, rk))
+        # print("Cipher Text : ", cipher_text)
+
+    elif pilihan == "Decrypt":
+        # print("============================================== Decryption ================================================================")
+        rkb_rev = rkb[::-1]
+        rk_rev = rk[::-1]
+        # cipher_text = input("Masukkan Cipher_text: ")
+        text = hex2ascii(bin2hex(proses(text, rkb_rev, rk_rev)))
+        # print("Plain Text : ", text)
+
+    return text
+
+
+# result = process_function("dhafinal", "dhafinal", 1)
+# print(result)
+
+
+iface = gr.Interface(
+    fn=process_function,
+    inputs=["text", "text", gr.inputs.Radio(["Encrypt", "Decrypt"])],
+    outputs="text",
+    title="Ceritanya Impelementasi DES",
+    description="Tool sederhana untuk enkripsi dan dekripsi teks menggunakan Algoritma DES.",
+    theme="compact"
+)
+
+if __name__ == "__main__":
+    iface.launch()
+
