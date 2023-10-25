@@ -1,4 +1,3 @@
-import sys
 import gradio as gr
 
 #fungsi untuk konversi ascii karakter ke bentuk hexadesimal
